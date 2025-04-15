@@ -1,0 +1,362 @@
+openapi: 3.0.0
+info:
+  title: Weverse API
+  description: Unofficial API wrapper for Weverse.io
+  version: 1.0.0
+  contact:
+    email: your_email@example.com
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+tags:
+  - name: Auth
+    description: Authentication operations
+  - name: Communities
+    description: Operations related to communities
+  - name: Posts
+    description: Operations related to posts
+  - name: Media
+    description: Operations related to media
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: User login
+      description: Authenticate with Weverse using email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Authentication successful
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Email and password are required
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication failed
+  /api/communities:
+    get:
+      tags:
+        - Communities
+      summary: Get all communities
+      description: Get a list of all available communities on Weverse
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Community'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Not authenticated with Weverse
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get communities
+  /api/communities/{communityId}/posts:
+    get:
+      tags:
+        - Communities
+        - Posts
+      summary: Get posts for a community
+      description: Get posts for a specific community with pagination support
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          description: ID of the community
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number (starts from 1)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: size
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Not authenticated with Weverse
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get posts
+  /api/communities/{communityId}/artists:
+    get:
+      tags:
+        - Communities
+      summary: Get artists for a community
+      description: Get artists that belong to a specific community
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          description: ID of the community
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artist'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Not authenticated with Weverse
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get artists
+  /api/posts/{postId}/media:
+    get:
+      tags:
+        - Posts
+        - Media
+      summary: Get media for a post
+      description: Get all media associated with a specific post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          description: ID of the post
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Media'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Not authenticated with Weverse
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get media
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Community:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "12345"
+        name:
+          type: string
+          example: "BTS"
+        description:
+          type: string
+          example: "BTS official community"
+        logoUrl:
+          type: string
+          format: uri
+          example: "https://weverse.io/images/bts_logo.png"
+        memberCount:
+          type: integer
+          example: 1500000
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "post123"
+        communityId:
+          type: string
+          example: "12345"
+        artistId:
+          type: string
+          example: "artist789"
+        content:
+          type: string
+          example: "Hello ARMY!"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T12:00:00Z"
+        likeCount:
+          type: integer
+          example: 150000
+        commentCount:
+          type: integer
+          example: 5000
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "artist789"
+        name:
+          type: string
+          example: "Kim Namjoon"
+        stageName:
+          type: string
+          example: "RM"
+        profileImageUrl:
+          type: string
+          format: uri
+          example: "https://weverse.io/images/rm_profile.png"
+        communityId:
+          type: string
+          example: "12345"
+    Media:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "media456"
+        postId:
+          type: string
+          example: "post123"
+        type:
+          type: string
+          enum: [image, video, audio]
+          example: "image"
+        url:
+          type: string
+          format: uri
+          example: "https://weverse.io/media/12345.jpg"
+        thumbnailUrl:
+          type: string
+          format: uri
+          example: "https://weverse.io/media/thumbnails/12345.jpg"
+        width:
+          type: integer
+          example: 1080
+        height:
+          type: integer
+          example: 720 
