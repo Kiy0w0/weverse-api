@@ -28,8 +28,8 @@ if (process.env.WEVERSE_EMAIL && process.env.WEVERSE_PASSWORD) {
     // Jika masih tidak tersedia, gunakan nilai hardcoded untuk pengujian
     if (!process.env.WEVERSE_EMAIL || !process.env.WEVERSE_PASSWORD) {
       logger.warn('Using hardcoded credentials as fallback for testing');
-      process.env.WEVERSE_EMAIL = 'stokmlpipzstore01@gmail.com';
-      process.env.WEVERSE_PASSWORD = '@2001Amel';
+      process.env.WEVERSE_EMAIL = '@gmail.com';
+      process.env.WEVERSE_PASSWORD = '@';
     }
   } catch (error) {
     logger.error(`Error checking .env file: ${error.message}`);
